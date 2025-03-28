@@ -1,4 +1,5 @@
 import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -119,6 +120,125 @@ public class BankApplicationTests
         IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
                                                            () -> bank2.retrieveAccount("00000"));
         assertEquals("Account not found",
+                     exception2.getMessage());
+    }
+
+    // Additional test 1, checks to make sure the balance is not transferred to the same account.
+    @Test
+    void selfTransferDoesNotChangeBalance()
+    {
+        double initialBalance = account1.getBalanceUsd();
+
+        account1.transferToBank(account1,
+                                "12345",
+                                200);
+
+        assertEquals(initialBalance,
+                     account1.getBalanceUsd(),
+                     "Self-transfer should not change the account balance.");
+    }
+
+    // Additional test 2, checks for duplicate account
+    @Test
+    void duplicateAccountIdThrowsException()
+    {
+        BankAccount duplicateAccount = new BankAccount("12345",
+                                                       1000);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> bank1.addAccount(duplicateAccount));
+
+        assertEquals("Duplicate account number",
+                     exception.getMessage());
+    }
+
+    // Additional test 3 bad constructor arguments
+    @Test
+    void handlingInvalidConstructorArguments()
+    {
+        IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class,
+                                                           () -> new BankAccount(null,
+                                                                                 100));
+        assertEquals("Invalid account number",
+                     exception1.getMessage());
+
+        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
+                                                           () -> new BankAccount("",
+                                                                                 100));
+        assertEquals("Invalid account number",
+                     exception2.getMessage());
+
+        IllegalArgumentException exception3 = assertThrows(IllegalArgumentException.class,
+                                                           () -> new BankAccount("54321",
+                                                                                 -50));
+        assertEquals("Balance cannot be negative",
+                     exception3.getMessage());
+    }
+
+    // Additional test 4 null bank account in transfer
+    @Test
+    void handlingNullAccountRetrieval()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> account1.transferToBank(null,
+                                                                                        "12345",
+                                                                                        200));
+        assertEquals("Invalid target account",
+                     exception.getMessage());
+    }
+
+    // Additional test 5 check deposit with negative amount
+    @Test
+    void checkNegativeDeposit()
+    {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                                          () -> account1.deposit(-100));
+        assertEquals("Deposit amount must be positive",
+                     exception.getMessage());
+    }
+
+    // Additional test 6 check withdraw with negative amount
+    @Test
+    void checkNegativeWithdraw()
+    {
+        IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class,
+                                                           () -> account1.withdraw(-1));
+        assertEquals("Cannot withdraw negative amount",
+                     exception1.getMessage());
+
+        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
+                                                           () -> account2.withdraw(-1999));
+        assertEquals("Cannot withdraw negative amount",
+                     exception2.getMessage());
+    }
+
+    // Additional test 7 check for null when adding accounts
+    @Test
+    void checkNullBankAccountAdd()
+    {
+        IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class,
+                                                           () -> bank1.addAccount(null));
+        assertEquals("Cannot add null account",
+                     exception1.getMessage());
+
+        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
+                                                           () -> bank2.addAccount(null));
+        assertEquals("Cannot add null account",
+                     exception2.getMessage());
+    }
+
+    // Additional test 8 check for null when retrieving accounts
+    @Test
+    void checkNullBankAccountRetrieval()
+    {
+        IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class,
+                                                           () -> bank1.retrieveAccount(null));
+        assertEquals("Cannot retrieve null account",
+                     exception1.getMessage());
+
+        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class,
+                                                           () -> bank2.retrieveAccount(null));
+        assertEquals("Cannot retrieve null account",
                      exception2.getMessage());
     }
 }
